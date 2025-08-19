@@ -13,7 +13,7 @@ const app: Application = express();
 
 // Middleware setup
 // app.use(cors({ origin: "http://localhost:3000" }));
-app.use(cors({ origin: "https://basa-finder-client-two.vercel.app" }));
+app.use(cors({ origin: "https://learn-lab-server.vercel.app" }));
 
 app.use(cookieParser());
 app.use(express.json());

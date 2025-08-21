@@ -34,46 +34,10 @@ const createLecture = async (
 };
 
 const getAllLectures = async (query: Record<string, unknown>) => {
-  const {
-    minPrice,
-    maxPrice,
-    minSquareFeet,
-    maxSquareFeet,
-    categories,
-    brands,
-    inStock,
-    ratings,
-    location,
-    moduleId,
-    moduleTitle,
-    courseTitle,
-    ...pQuery
-  } = query;
+  const { moduleId, moduleTitle, courseTitle, ...pQuery } = query;
 
   // Build the filter object
   const filter: Record<string, any> = {};
-
-  // Filter by categories
-  if (categories) {
-    const categoryArray =
-      typeof categories === "string"
-        ? categories.split(",")
-        : Array.isArray(categories)
-        ? categories
-        : [categories];
-    filter.category = { $in: categoryArray };
-  }
-
-  // Filter by brands
-  if (brands) {
-    const brandArray =
-      typeof brands === "string"
-        ? brands.split(",")
-        : Array.isArray(brands)
-        ? brands
-        : [brands];
-    filter.brand = { $in: brandArray };
-  }
 
   // filter by moduleId
   if (moduleId) {

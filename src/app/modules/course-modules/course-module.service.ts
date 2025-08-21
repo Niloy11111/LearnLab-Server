@@ -25,57 +25,10 @@ const getAllCourseModules = async (
   courseId: string,
   query: Record<string, unknown>
 ) => {
-  const {
-    minPrice,
-    maxPrice,
-    minSquareFeet,
-    maxSquareFeet,
-    categories,
-    brands,
-    inStock,
-    ratings,
-    location,
-    ...pQuery
-  } = query;
+  const { ...pQuery } = query;
 
   // Build the filter object
   const filter: Record<string, any> = {};
-
-  // Filter by categories
-  if (categories) {
-    const categoryArray =
-      typeof categories === "string"
-        ? categories.split(",")
-        : Array.isArray(categories)
-        ? categories
-        : [categories];
-    filter.category = { $in: categoryArray };
-  }
-
-  // Filter by brands
-  if (brands) {
-    const brandArray =
-      typeof brands === "string"
-        ? brands.split(",")
-        : Array.isArray(brands)
-        ? brands
-        : [brands];
-    filter.brand = { $in: brandArray };
-  }
-
-  // filter by courseId
-  if (courseId) {
-    const courseArray =
-      typeof courseId === "string"
-        ? courseId.split(",")
-        : Array.isArray(courseId)
-        ? courseId
-        : [courseId];
-    filter.course = { $in: courseArray };
-  }
-
-  // console.log("filter", filter);
-  // console.log("pquery", pQuery);
 
   const productQuery = new QueryBuilder(CourseModule.find(filter), pQuery)
     // .search(["name", "description"])

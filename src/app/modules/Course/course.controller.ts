@@ -4,7 +4,6 @@ import { StatusCodes } from "http-status-codes";
 import { IImageFile } from "../../interface/IImageFile";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import { IJwtPayload } from "../auth/auth.interface";
 import { ProductService } from "./course.service";
 // req.user as IJwtPayload
 const createProduct = catchAsync(async (req: Request, res: Response) => {
@@ -33,17 +32,6 @@ const getAllProduct = catchAsync(async (req, res) => {
   });
 });
 
-const getTrendingProducts = catchAsync(async (req, res) => {
-  const { limit } = req.query;
-  const result = await ProductService.getTrendingProducts(Number(limit));
-
-  sendResponse(res, {
-    statusCode: StatusCodes.OK,
-    success: true,
-    message: "Products are retrieved successfully",
-    data: result,
-  });
-});
 const getSingleProduct = catchAsync(async (req, res) => {
   const { productId } = req.params;
   const result = await ProductService.getSingleProduct(productId);
@@ -53,21 +41,6 @@ const getSingleProduct = catchAsync(async (req, res) => {
     success: true,
     message: "Product retrieved successfully",
     data: result,
-  });
-});
-
-const getMyShopProducts = catchAsync(async (req, res) => {
-  const result = await ProductService.getMyShopProducts(
-    req.query,
-    req.user as IJwtPayload
-  );
-
-  sendResponse(res, {
-    statusCode: StatusCodes.OK,
-    success: true,
-    message: "Products are retrieved successfully",
-    meta: result.meta,
-    data: result.result,
   });
 });
 
@@ -111,9 +84,8 @@ const deleteProduct = catchAsync(async (req, res) => {
 export const ProductController = {
   createProduct,
   getAllProduct,
-  getTrendingProducts,
+
   getSingleProduct,
   updateProduct,
   deleteProduct,
-  getMyShopProducts,
 };

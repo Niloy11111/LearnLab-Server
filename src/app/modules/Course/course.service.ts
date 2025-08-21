@@ -2,10 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import QueryBuilder from "../../builder/QueryBuilder";
 import AppError from "../../errors/appError";
 import { IImageFile } from "../../interface/IImageFile";
-import { IJwtPayload } from "../auth/auth.interface";
 import { Review } from "../review/review.model";
-import Shop from "../shop/shop.model";
-import User from "../user/user.model";
 import { IProduct } from "./course.interface";
 import { Product } from "./course.model";
 // authUser: IJwtPayload
@@ -174,58 +171,6 @@ const getAllProduct = async (query: Record<string, unknown>) => {
   };
 };
 
-const getTrendingProducts = async (limit: number) => {
-  const now = new Date();
-  const last30Days = new Date(now.setDate(now.getDate() - 30));
-
-  const trendingProducts = await Order.aggregate([
-    {
-      $match: {
-        createdAt: { $gte: last30Days },
-      },
-    },
-    {
-      $unwind: "$products",
-    },
-    {
-      $group: {
-        _id: "$products.product",
-        orderCount: { $sum: "$products.quantity" },
-      },
-    },
-    {
-      $sort: { orderCount: -1 },
-    },
-    {
-      $limit: limit || 10,
-    },
-    {
-      $lookup: {
-        from: "products",
-        localField: "_id",
-        foreignField: "_id",
-        as: "productDetails",
-      },
-    },
-    {
-      $unwind: "$productDetails",
-    },
-    {
-      $project: {
-        _id: 0,
-        productId: "$_id",
-        orderCount: 1,
-        name: "$productDetails.name",
-        price: "$productDetails.price",
-        offer: "$productDetails.offer",
-        imageUrls: "$productDetails.imageUrls",
-      },
-    },
-  ]);
-
-  return trendingProducts;
-};
-
 const getSingleProduct = async (productId: string) => {
   const product = await Product.findById(productId);
   if (!product) {
@@ -245,70 +190,6 @@ const getSingleProduct = async (productId: string) => {
     ...productObj,
     // offerPrice,
     reviews,
-  };
-};
-
-const getMyShopProducts = async (
-  query: Record<string, unknown>,
-  authUser: IJwtPayload
-) => {
-  const userHasShop = await User.findById(authUser.userId).select(
-    "isActive hasShop"
-  );
-
-  if (!userHasShop)
-    throw new AppError(StatusCodes.NOT_FOUND, "User not found!");
-  if (!userHasShop.isActive)
-    throw new AppError(StatusCodes.BAD_REQUEST, "User account is not active!");
-  if (!userHasShop.hasShop)
-    throw new AppError(StatusCodes.BAD_REQUEST, "User does not have any shop!");
-
-  const shopIsActive = await Shop.findOne({
-    user: userHasShop._id,
-    isActive: true,
-  }).select("isActive");
-
-  if (!shopIsActive)
-    throw new AppError(StatusCodes.BAD_REQUEST, "Shop is not active!");
-
-  const { minPrice, maxPrice, minSquareFeet, maxSquareFeet, ...pQuery } = query;
-
-  const productQuery = new QueryBuilder(
-    Product.find({ shop: shopIsActive._id })
-      .populate("category", "name")
-      .populate("shop", "shopName")
-      .populate("brand", "name"),
-    pQuery
-  )
-    .search(["name", "description"])
-    .filter()
-    .sort()
-    .paginate()
-    .fields()
-    .priceRange(Number(minPrice) || 0, Number(maxPrice) || Infinity)
-    .squareFeetRange(
-      Number(minSquareFeet) || 0,
-      Number(maxSquareFeet) || Infinity
-    );
-
-  const products = await productQuery.modelQuery.lean();
-
-  const productsWithOfferPrice = await Promise.all(
-    products.map(async (product) => {
-      const productDoc = await Product.findById(product._id);
-      // const offerPrice = productDoc?.offerPrice;
-      return {
-        ...product,
-        // offerPrice: Number(offerPrice) || null,
-      };
-    })
-  );
-
-  const meta = await productQuery.countTotal();
-
-  return {
-    meta,
-    result: productsWithOfferPrice,
   };
 };
 
@@ -332,7 +213,10 @@ const updateProduct = async (
   return await Product.findByIdAndUpdate(productId, payload, { new: true });
 };
 
-const deleteProduct = async (productId: string) => {
+const deleteProduct = async (
+  productId: string,
+  payload: { isDeleted?: string }
+) => {
   const product = await Product.findOne({
     _id: productId,
   });
@@ -341,7 +225,9 @@ const deleteProduct = async (productId: string) => {
     throw new AppError(StatusCodes.NOT_FOUND, "Product Not Found");
   }
 
-  product.isDeleted = true;
+  if (payload?.isDeleted === "true") {
+    product.isDeleted = true;
+  }
 
   const updatedProduct = await product.save();
   return {
@@ -352,9 +238,8 @@ const deleteProduct = async (productId: string) => {
 export const ProductService = {
   createProduct,
   getAllProduct,
-  getTrendingProducts,
+
   getSingleProduct,
   updateProduct,
   deleteProduct,
-  getMyShopProducts,
 };

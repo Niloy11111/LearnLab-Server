@@ -41,7 +41,7 @@ router.patch(
 );
 
 router.patch(
-  "/:productId",
+  "/:productId/delete",
   auth(UserRole.ADMIN),
   ProductController.deleteProduct
 );

@@ -6,14 +6,12 @@ import os from "os";
 import globalErrorHandler from "./app/middleware/globalErrorHandler";
 import notFound from "./app/middleware/notFound";
 import router from "./app/routes";
-// import seedAdmin from './app/DB/seed';
-// import { sslService } from './app/modules/sslcommerz/sslcommerz.service';
 
 const app: Application = express();
 
 // Middleware setup
 // app.use(cors({ origin: "http://localhost:3000" }));
-app.use(cors({ origin: "https://learn-lab-server.vercel.app" }));
+app.use(cors({ origin: "https://learn-lab-client.vercel.app" }));
 
 app.use(cookieParser());
 app.use(express.json());

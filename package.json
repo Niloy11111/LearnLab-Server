@@ -1,9 +1,9 @@
 {
-  "name": "Minimul-LMS-System-Server",
+  "name": "learnlab-server",
   "version": "1.0.0",
   "description": "A e-commerce web application server.",
   "main": "server.js",
-  "repository": "https://github.com/Niloy11111/Minimul-LMS-System-Server",
+  "repository": "https://github.com/Niloy11111/LearnLab-Server",
   "author": "Niloy",
   "license": "MIT",
   "scripts": {
@@ -12,7 +12,7 @@
     "build": "tsc",
     "create-module": "npx ts-node src/scripts/createModule.ts",
     "deploy": "yarn build && vercel && vercel --prod",
-    "commit": "git add . && git commit -m \"edited\" && git push"
+    "commit": "git add . && git commit -m \"built userProgress modules and made some update\" && git push"
   },
   "dependencies": {
     "@types/nodemailer": "^6.4.17",
